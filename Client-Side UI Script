@@ -1,0 +1,73 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local Theme = {
+    Background = Color3.fromRGB(0, 0, 0),
+    Text = Color3.fromRGB(255, 255, 0),
+    Button = Color3.fromRGB(30, 30, 30)
+}
+
+local TeleportCoords = {
+    ["Entrance Room"] = CFrame.new(0, 3, 0), ["Basement"] = CFrame.new(0, -25, -10),
+    ["Kitchen"] = CFrame.new(-45, 3, 15), ["Living Room"] = CFrame.new(45, 3, 15),
+    ["Backyard"] = CFrame.new(0, 3, 70), ["Blue Bedroom"] = CFrame.new(-30, 28, -20),
+    ["Pink Bedroom"] = CFrame.new(0, 28, -20), ["Green Bedroom"] = CFrame.new(30, 28, -20),
+    ["Bathroom"] = CFrame.new(0, 28, 25), ["Attic"] = CFrame.new(0, 52, -10),
+    ["The Road"] = CFrame.new(0, 2, -90), ["Blocky Mart"] = CFrame.new(-10, 3, -170),
+    ["Uncle Petes Home"] = CFrame.new(110, 3, -150), ["Sewer"] = CFrame.new(-10, -35, -120),
+    ["Scary Larrys House"] = CFrame.new(2000, 50, 2000), ["Meadows"] = CFrame.new(-2000, 10, -2000)
+}
+
+local Data = {
+    ["Quest"] = {"Find Uncle Pete", "Fetch Food", "Bake Pie"},
+    ["Items"] = {"Food", "Weapons", "Utility"},
+    ["Teleport"] = {"House", "Neighborhood", "Boss & Special"},
+    ["Misc"] = {"ESP Toggle", "WalkSpeed Slider", "Fly Toggle"}
+}
+
+local SubMaps = {
+    ["House"] = {"Basement", "Entrance Room", "Kitchen", "Living Room", "Backyard", "Blue Bedroom", "Pink Bedroom", "Green Bedroom", "Bathroom", "Attic"},
+    ["Neighborhood"] = {"Blocky Mart", "Sewer", "Uncle Petes Home", "The Road"},
+    ["Boss & Special"] = {"Scary Larrys House", "Meadows"}
+}
+
+local SubItems = {
+    ["Food"] = {"Apple", "Cookie", "Bloxy Cola", "Bag of Chips", "Medkit", "Super Heal", "Pie Dish", "Pizza"},
+    ["Weapons"] = {"Crowbar", "Baseball Bat", "Hammer", "Wrench", "Pitchfork", "Broom", "Classic Sword", "Gun", "Machine Gun"},
+    ["Utility"] = {"Planks", "Teddy Bear", "The Code", "Money", "Key", "Golden Key"}
+}
+
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+
+local toggleButton = Instance.new("TextButton", screenGui); toggleButton.Size = UDim2.new(0, 100, 0, 50); toggleButton.Position = UDim2.new(0, 10, 0, 10); toggleButton.Text = "Menu"; toggleButton.BackgroundColor3 = Theme.Button; toggleButton.TextColor3 = Theme.Text
+
+local mainFrame = Instance.new("Frame", screenGui); mainFrame.Size = UDim2.new(0.8, 0, 0.6, 0); mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0); mainFrame.AnchorPoint = Vector2.new(0.5, 0.5); mainFrame.BackgroundColor3 = Theme.Background; mainFrame.Visible = false
+toggleButton.Activated:Connect(function() mainFrame.Visible = not mainFrame.Visible end)
+
+local sideBar = Instance.new("ScrollingFrame", mainFrame); sideBar.Size = UDim2.new(0, 100, 1, 0); sideBar.BackgroundColor3 = Theme.Button; Instance.new("UIListLayout", sideBar)
+local contentArea = Instance.new("ScrollingFrame", mainFrame); contentArea.Size = UDim2.new(1, -100, 1, 0); contentArea.Position = UDim2.new(0, 100, 0, 0); contentArea.BackgroundTransparency = 1; Instance.new("UIListLayout", contentArea)
+
+local function refreshContent(category)
+    contentArea:ClearAllChildren()
+    for _, name in ipairs(Data[category] or {}) do
+        local btn = Instance.new("TextButton", contentArea); btn.Size = UDim2.new(1, 0, 0, 45); btn.Text = name; btn.BackgroundColor3 = Theme.Button; btn.TextColor3 = Theme.Text
+        btn.Activated:Connect(function()
+            if SubMaps[name] or SubItems[name] then
+                contentArea:ClearAllChildren()
+                local backBtn = Instance.new("TextButton", contentArea); backBtn.Text = "< BACK"; backBtn.Size = UDim2.new(1, 0, 0, 45); backBtn.Activated:Connect(function() refreshContent(category) end)
+                for _, sub in ipairs(SubMaps[name] or SubItems[name]) do
+                    local subBtn = Instance.new("TextButton", contentArea); subBtn.Size = UDim2.new(1, 0, 0, 45); subBtn.Text = sub; subBtn.Activated:Connect(function()
+                        if TeleportCoords[sub] then player.Character.HumanoidRootPart.CFrame = TeleportCoords[sub]
+                        else game.ReplicatedStorage.ItemRequestEvent:FireServer(sub) end
+                    end)
+                end
+            end
+        end)
+    end
+end
+
+for cat, _ in pairs(Data) do
+    local btn = Instance.new("TextButton", sideBar); btn.Size = UDim2.new(1, 0, 0, 45); btn.Text = cat; btn.Activated:Connect(function() refreshContent(cat) end)
+end
