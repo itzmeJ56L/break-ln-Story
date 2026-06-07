@@ -1,0 +1,3 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/itzmeJ56L/break-ln-Story/refs/heads/main/Server-Side%20Script"))()
+task.wait(0.2)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/itzmeJ56L/break-ln-Story/refs/heads/main/Client-Side%20UI%20Script"))()
