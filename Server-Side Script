@@ -1,0 +1,17 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ItemStorage = ReplicatedStorage:WaitForChild("ItemStorage")
+
+local RemoteEvent = Instance.new("RemoteEvent", ReplicatedStorage)
+RemoteEvent.Name = "ItemRequestEvent"
+
+RemoteEvent.OnServerEvent:Connect(function(player: Player, itemName: string)
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        local itemPrefab = ItemStorage:FindFirstChild(itemName)
+        if itemPrefab and itemPrefab:IsA("Tool") then
+            itemPrefab:Clone().Parent = backpack
+        else
+            warn("Item '" .. itemName .. "' not found in ItemStorage.")
+        end
+    end
+end)
